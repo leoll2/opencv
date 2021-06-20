@@ -42,6 +42,7 @@
 #ifndef OPENCV_DNN_DNN_HPP
 #define OPENCV_DNN_DNN_HPP
 
+#include <cmath>
 #include <vector>
 #include <opencv2/core.hpp>
 #include "opencv2/core/async.hpp"
@@ -95,6 +96,17 @@ CV__DNN_INLINE_NS_BEGIN
         DNN_TARGET_CUDA,
         DNN_TARGET_CUDA_FP16,
         DNN_TARGET_HDDL
+    };
+
+    /**
+     * @brief Enum of Non-Maximum-Suppression (NMS) algorithms
+     * @see NMSBoxes
+     */
+    enum NmsPolicy
+    {
+        NMS_HARD = 0,
+        NMS_SOFT_LINEAR,
+        NMS_SOFT_GAUSSIAN,
     };
 
     CV_EXPORTS std::vector< std::pair<Backend, Target> > getAvailableBackends();
@@ -1068,21 +1080,25 @@ CV__DNN_INLINE_NS_BEGIN
      * @param indices the kept indices of bboxes after NMS.
      * @param eta a coefficient in adaptive threshold formula: \f$nms\_threshold_{i+1}=eta\cdot nms\_threshold_i\f$.
      * @param top_k if `>0`, keep at most @p top_k picked indices.
+     * @param nms_policy nms algorithm to use (standard "hard", or its "soft" variations)
      */
     CV_EXPORTS void NMSBoxes(const std::vector<Rect>& bboxes, const std::vector<float>& scores,
                                const float score_threshold, const float nms_threshold,
                                CV_OUT std::vector<int>& indices,
-                               const float eta = 1.f, const int top_k = 0);
+                               const float eta = 1.f, const int top_k = 0,
+                               const int nms_policy = 0);
 
     CV_EXPORTS_W void NMSBoxes(const std::vector<Rect2d>& bboxes, const std::vector<float>& scores,
                                const float score_threshold, const float nms_threshold,
                                CV_OUT std::vector<int>& indices,
-                               const float eta = 1.f, const int top_k = 0);
+                               const float eta = 1.f, const int top_k = 0,
+                               const int nms_policy = 0);
 
     CV_EXPORTS_AS(NMSBoxesRotated) void NMSBoxes(const std::vector<RotatedRect>& bboxes, const std::vector<float>& scores,
                              const float score_threshold, const float nms_threshold,
                              CV_OUT std::vector<int>& indices,
-                             const float eta = 1.f, const int top_k = 0);
+                             const float eta = 1.f, const int top_k = 0,
+                             const int nms_policy = 0);
 
 
      /** @brief This class is presented high-level API for neural networks.

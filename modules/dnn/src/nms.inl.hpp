@@ -70,6 +70,7 @@ inline void NMSFast_(const std::vector<BoxType>& bboxes,
       const float nms_threshold, const float eta, const int top_k,
       std::vector<int>& indices,
       float (*computeOverlap)(const BoxType&, const BoxType&),
+      const int nms_policy = 0,
       int limit = std::numeric_limits<int>::max())
 {
     CV_Assert(bboxes.size() == scores.size());
@@ -82,12 +83,27 @@ inline void NMSFast_(const std::vector<BoxType>& bboxes,
     float adaptive_threshold = nms_threshold;
     indices.clear();
     for (size_t i = 0; i < score_index_vec.size(); ++i) {
+        const float s = score_index_vec[i].first;
         const int idx = score_index_vec[i].second;
         bool keep = true;
         for (int k = 0; k < (int)indices.size() && keep; ++k) {
             const int kept_idx = indices[k];
             float overlap = computeOverlap(bboxes[idx], bboxes[kept_idx]);
-            keep = overlap <= adaptive_threshold;
+            if (algorithm == NmsPolicy::NMS_HARD) {  // NMS
+                keep = overlap <= adaptive_threshold;
+            } else {  // Soft-NMS
+                if (algorithm == NmsPolicy::NMS_SOFT_LINEAR) {
+                    if (overlap >= adaptive_threshold) {
+                        s = s * (1 - overlap);
+                    }
+                } else if (algorithm == NmsPolicy::NMS_SOFT_GAUSSIAN) {
+                    const float sigma = 0.5;  // TODO make it configurable?
+                    s = s * exp(-overlap * overlap / sigma);
+                } else {
+                    // TODO what do do?
+                }
+                keep = s > score_threshold;
+            }
         }
         if (keep) {
             indices.push_back(idx);

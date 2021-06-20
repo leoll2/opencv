@@ -21,20 +21,22 @@ static inline float rectOverlap(const T& a, const T& b)
 
 void NMSBoxes(const std::vector<Rect>& bboxes, const std::vector<float>& scores,
                           const float score_threshold, const float nms_threshold,
-                          std::vector<int>& indices, const float eta, const int top_k)
+                          std::vector<int>& indices, const float eta, const int top_k,
+                          const int nms_policy)
 {
     CV_Assert_N(bboxes.size() == scores.size(), score_threshold >= 0,
         nms_threshold >= 0, eta > 0);
-    NMSFast_(bboxes, scores, score_threshold, nms_threshold, eta, top_k, indices, rectOverlap);
+    NMSFast_(bboxes, scores, score_threshold, nms_threshold, eta, top_k, indices, rectOverlap, nms_policy);
 }
 
 void NMSBoxes(const std::vector<Rect2d>& bboxes, const std::vector<float>& scores,
                           const float score_threshold, const float nms_threshold,
-                          std::vector<int>& indices, const float eta, const int top_k)
+                          std::vector<int>& indices, const float eta, const int top_k,
+                          const int nms_policy)
 {
     CV_Assert_N(bboxes.size() == scores.size(), score_threshold >= 0,
         nms_threshold >= 0, eta > 0);
-    NMSFast_(bboxes, scores, score_threshold, nms_threshold, eta, top_k, indices, rectOverlap);
+    NMSFast_(bboxes, scores, score_threshold, nms_threshold, eta, top_k, indices, rectOverlap, nms_policy);
 }
 
 static inline float rotatedRectIOU(const RotatedRect& a, const RotatedRect& b)
@@ -51,11 +53,12 @@ static inline float rotatedRectIOU(const RotatedRect& a, const RotatedRect& b)
 
 void NMSBoxes(const std::vector<RotatedRect>& bboxes, const std::vector<float>& scores,
               const float score_threshold, const float nms_threshold,
-              std::vector<int>& indices, const float eta, const int top_k)
+              std::vector<int>& indices, const float eta, const int top_k,
+              const int nms_policy)
 {
     CV_Assert_N(bboxes.size() == scores.size(), score_threshold >= 0,
         nms_threshold >= 0, eta > 0);
-    NMSFast_(bboxes, scores, score_threshold, nms_threshold, eta, top_k, indices, rotatedRectIOU);
+    NMSFast_(bboxes, scores, score_threshold, nms_threshold, eta, top_k, indices, rotatedRectIOU, nms_policy);
 }
 
 CV__DNN_INLINE_NS_END
